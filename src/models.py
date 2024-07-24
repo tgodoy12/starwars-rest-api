@@ -98,7 +98,7 @@ class Vehicle(db.Model):
     cargo_capacity = db.Column(db.String(250))
     consumables = db.Column(db.String(250))
     vehicle_class = db.Column(db.String(250))
-    favorites = db.relationship('Favorites', backref='character', lazy=True)
+    favorites = db.relationship('Favorites', backref='vehicle', lazy=True)
 
     def __repr__(self):
         return '<Vehicle %r>' % self.name
@@ -124,6 +124,7 @@ class Favorites(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     character_id = db.Column(db.Integer, db.ForeignKey('character.id'))
     planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.id'))
     
 
     def __repr__(self):

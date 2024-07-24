@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Planet, Character
+from models import db, User, Planet, Character, Vehicle
 #from models import Person
 
 app = Flask(__name__)
@@ -64,7 +64,7 @@ def get_one_user(id):
     # print(planet)
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /user/id response ",
         "result": user_serialized
     }
 
@@ -79,7 +79,7 @@ def get_all_planets():
     # print(planets_serialized)
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /planets response ",
         "results": planets_serialized
     }
 
@@ -94,22 +94,22 @@ def get_all_characters():
     # print(characters_serialized)
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /characters response ",
         "results": characters_serialized
     }
 
     return jsonify(response_body), 200
 
-# GET AL VEHICLES
+# GET ALL VEHICLES
 @app.route('/vehicles', methods=['GET'])
 def get_all_vehicles():
 
-    all_vehicles = Character.query.all()
+    all_vehicles = Vehicle.query.all()
     vehicles_serialized = list(map(lambda item : item.serialize(), all_vehicles))
     
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /vehicles response ",
         "results": vehicles_serialized
     }
 
@@ -129,7 +129,7 @@ def get_one_character(id):
     # print(character)
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /character/id response ",
         "result": character_serialized
     }
 
@@ -147,13 +147,47 @@ def get_one_planet(id):
     # print(planet)
 
     response_body = {
-        "msg": "Hello, this is your GET /user response ",
+        "msg": "Hello, this is your GET /planet/id response ",
         "result": planet_serialized
     }
 
     return jsonify(response_body), 200
 
-# GET VEHICLES BY ID
+# GET VEHICLE BY ID
+@app.route('/vehicle/<int:id>', methods=['GET'])
+def get_one_vehicle(id):
+
+    vehicle = Vehicle.query.filter_by(id=id).first()
+    if vehicle is None:
+        return jsonify({"msg": "Vehicle not found"}), 404
+    
+    vehicle_serialized = vehicle.serialize()
+    # print(planet)
+
+    response_body = {
+        "msg": "Hello, this is your GET /vehicle/id response ",
+        "result": vehicle_serialized
+    }
+
+    return jsonify(response_body), 200
+
+# GET USER'S ALL FAVORITES
+# @app.route('/user<int:id>/favorites', methods=['GET'])
+# def get_user_favorites():
+
+    # obtención del usuario
+    # obtención de sus favoritos
+    # serialize() resultados
+    # manejar errores
+    # mostrar resultados en response_body    
+
+    # response_body = {
+    #     "msg": "Hello, this is your GET /vehicles response ",
+    #     "results":
+    # }
+
+    # return jsonify(response_body), 200
+
 
 
 

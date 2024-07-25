@@ -185,20 +185,21 @@ def get_user_favorites(id):
     print(user)
     
     # obtención de sus favoritos
-    favorites = Favorites.query.filter_by(user_id=id).all()
+    favorites = user.get_favorites()
+    print(favorites)
+    
     
     if not favorites:
         return jsonify({"msg": "No favorites found"}), 404
 
     # serialize() resultados
-    favorites_serialized = list(map(lambda item : item.serialize(), favorites))
-    print(favorites_serialized)
+    # favorites_serialized = list(map(lambda item : item.serialize(), favorites))
+    # print(favorites_serialized)
     
     # mostrar resultados en response_body    
     response_body = {
         "msg": "Hello, this is your GET /vehicles response ",
-        "results": 
-            [{"username": user_serialized["user_name"]}, {"favorites": favorites_serialized}]
+        "results": favorites
     }
 
     return jsonify(response_body), 200
@@ -299,6 +300,27 @@ def add_favorite_vehicle(id):
     return jsonify(response_body), 201
 
 # *********** DELETE ************
+
+
+@app.route('/favorite/planet/<int:id>', methods=['DELETE'])
+def delete_planet_id(id):
+
+    data = Planet.query.filter_by(id=id).first()
+
+    if not data:
+        return jsonify({"msg": "You should specify a planet to delete"}), 400
+    
+    print(data)
+    
+    # db.session.delete(data)
+    # db.session.commit()
+
+    response_body = {
+        "msg": "Planet deleted"
+    }
+
+    return jsonify(response_body), 200
+
 
 
 

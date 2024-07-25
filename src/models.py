@@ -21,6 +21,9 @@ class User(db.Model):
             "is_active": self.is_active
             # do not serialize the password, its a security breach
         }
+    
+    def get_favorites(self):
+        return list(map(lambda item: item.serialize(), self.favorites))
 
 class Planet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -131,10 +134,14 @@ class Favorites(db.Model):
         return '<Favorites %r>' % self.id
 
     def serialize(self):
-        return {
-            "user_id": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id
+        user = User.query.filter_by(id=self.user_id).first()
+        vehicle = Vehicle.query.filter_by(id=self.vehicle_id).first()
+        print(vehicle)
 
+        return {
+            "user_info": user.serialize(),
+            "character_id": self.character_id,
+            "planet_id": self.planet_id,
+            "vehicle_info": vehicle.serialize()
             # do not serialize the password, its a security breach
         }

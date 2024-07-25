@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Planet, Character, Vehicle
+from models import db, User, Planet, Character, Vehicle, Favorites
 #from models import Person
 
 app = Flask(__name__)
@@ -36,7 +36,10 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-#GET ALL USERS
+
+# ********** GET ***********
+
+# Get all users
 @app.route('/users', methods=['GET'])
 def get_all_users():
 
@@ -51,7 +54,7 @@ def get_all_users():
 
     return jsonify(response_body), 200
 
-# GET USER BY ID
+# Get user by id
 @app.route('/user/<int:id>', methods=['GET'])
 def get_one_user(id):
 
@@ -60,17 +63,14 @@ def get_one_user(id):
     if user is None:
         return jsonify({"msg": "User not found"}), 404
     
-    user_serialized = user.serialize()
-    # print(planet)
-
     response_body = {
         "msg": "Hello, this is your GET /user/id response ",
-        "result": user_serialized
+        "result": user.serialize()
     }
 
     return jsonify(response_body), 200
 
-#GET ALL PLANETS
+# Get all planets
 @app.route('/planets', methods=['GET'])
 def get_all_planets():
 
@@ -85,7 +85,7 @@ def get_all_planets():
 
     return jsonify(response_body), 200
 
-# GET ALL CHARACTERS
+# Get all characters
 @app.route('/characters', methods=['GET'])
 def get_all_characters():
 
@@ -100,7 +100,7 @@ def get_all_characters():
 
     return jsonify(response_body), 200
 
-# GET ALL VEHICLES
+# Get all vehicles
 @app.route('/vehicles', methods=['GET'])
 def get_all_vehicles():
 
@@ -116,7 +116,7 @@ def get_all_vehicles():
     return jsonify(response_body), 200
 
 
-# GET CHARACTER BY ID
+# Get character by id
 @app.route('/character/<int:id>', methods=['GET'])
 def get_one_character(id):
 
@@ -135,7 +135,7 @@ def get_one_character(id):
 
     return jsonify(response_body), 200
 
-# GET PLANET BY ID
+# Get planet by id
 @app.route('/planet/<int:id>', methods=['GET'])
 def get_one_planet(id):
 
@@ -153,7 +153,7 @@ def get_one_planet(id):
 
     return jsonify(response_body), 200
 
-# GET VEHICLE BY ID
+# Get vehicle by id
 @app.route('/vehicle/<int:id>', methods=['GET'])
 def get_one_vehicle(id):
 
@@ -171,22 +171,137 @@ def get_one_vehicle(id):
 
     return jsonify(response_body), 200
 
-# GET USER'S ALL FAVORITES
-# @app.route('/user<int:id>/favorites', methods=['GET'])
-# def get_user_favorites():
+# Get specific user's all favorites
+@app.route('/user/<int:id>/favorites', methods=['GET'])
+def get_user_favorites(id):
 
     # obtención del usuario
+    user = User.query.filter_by(id=id).first()
+
+    if user is None:
+        return jsonify({"msg": "User not found"}), 404
+    
+    user_serialized = user.serialize()
+    print(user)
+    
     # obtención de sus favoritos
+    favorites = Favorites.query.filter_by(user_id=id).all()
+    
+    if not favorites:
+        return jsonify({"msg": "No favorites found"}), 404
+
     # serialize() resultados
-    # manejar errores
+    favorites_serialized = list(map(lambda item : item.serialize(), favorites))
+    print(favorites_serialized)
+    
     # mostrar resultados en response_body    
+    response_body = {
+        "msg": "Hello, this is your GET /vehicles response ",
+        "results": 
+            [{"username": user_serialized["user_name"]}, {"favorites": favorites_serialized}]
+    }
 
-    # response_body = {
-    #     "msg": "Hello, this is your GET /vehicles response ",
-    #     "results":
-    # }
+    return jsonify(response_body), 200
 
-    # return jsonify(response_body), 200
+
+# *********** POSTS ***********
+
+# Post favorite planet for specific user
+@app.route('/favorite/planet/<int:id>', methods=['POST'])
+def add_favorite_planet(id):
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a user"}), 400
+    
+    user_id = data["user_id"]
+    user = User.query.get(user_id)
+    planet = Planet.query.get(id)
+
+    # print(user, planet)
+
+    if not user:
+        return jsonify({"msg": "user not found"}), 404
+    
+    if not planet:
+        return jsonify({"msg": "planet not found"}), 404
+    
+
+    favorite_planet = Favorites(user_id = data["user_id"], planet_id = id)
+    db.session.add(favorite_planet)
+    db.session.commit()
+   
+    response_body = {
+        "msg": "Planet liked"
+    }
+
+    return jsonify(response_body), 201
+
+# Post favorite character for specific user
+@app.route('/favorite/character/<int:id>', methods=['POST'])
+def add_favorite_character(id):
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a user"}), 400
+    
+    user_id = data["user_id"]
+    user = User.query.get(user_id)
+    character = Character.query.get(id)
+
+    if not user:
+        return jsonify({"msg": "user not found"}), 404
+    
+    if not character:
+        return jsonify({"msg": "character not found"}), 404
+    
+
+    favorite_character = Favorites(user_id = data["user_id"], character_id = id)
+    db.session.add(favorite_character)
+    db.session.commit()
+   
+    response_body = {
+        "msg": "Character liked"
+    }
+
+    return jsonify(response_body), 201
+
+# Post favorite vehicle for specific user
+@app.route('/favorite/vehicle/<int:id>', methods=['POST'])
+def add_favorite_vehicle(id):
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a user"}), 400
+    
+    user_id = data["user_id"]
+    user = User.query.get(user_id)
+    vehicle = Vehicle.query.get(id)
+
+    if not user:
+        return jsonify({"msg": "user not found"}), 404
+    
+    if not vehicle:
+        return jsonify({"msg": "vehicle not found"}), 404
+    
+
+    favorite_vehicle = Favorites(user_id = data["user_id"], vehicle_id = id)
+    db.session.add(favorite_vehicle)
+    db.session.commit()
+   
+    response_body = {
+        "msg": "Vehicle liked"
+    }
+
+    return jsonify(response_body), 201
+
+# *********** DELETE ************
+
+
+
 
 
 

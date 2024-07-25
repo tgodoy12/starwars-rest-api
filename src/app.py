@@ -185,21 +185,19 @@ def get_user_favorites(id):
     print(user)
     
     # obtención de sus favoritos
-    favorites = user.get_favorites()
-    print(favorites)
-    
+    favorites = Favorites.query.filter_by(user_id=id).all()
     
     if not favorites:
         return jsonify({"msg": "No favorites found"}), 404
 
-    # serialize() resultados
-    # favorites_serialized = list(map(lambda item : item.serialize(), favorites))
-    # print(favorites_serialized)
+    # serializa cada favorito de la lista
+    favorites_serialized = [favorite.serialize() for favorite in favorites]
+    print(favorites_serialized)
     
     # mostrar resultados en response_body    
     response_body = {
         "msg": "Hello, this is your GET /vehicles response ",
-        "results": favorites
+        "results": favorites_serialized
     }
 
     return jsonify(response_body), 200
@@ -302,17 +300,22 @@ def add_favorite_vehicle(id):
 # *********** DELETE ************
 
 
-@app.route('/favorite/planet/<int:id>', methods=['DELETE'])
-def delete_planet_id(id):
+@app.route('/user/<int:userid>/favorite/<int:favoriteid>', methods=['DELETE'])
+def delete_planet_id(userid, favoriteid):
 
-    data = Planet.query.filter_by(id=id).first()
+    user = User.query.filter_by(id=userid).first()
 
-    if not data:
-        return jsonify({"msg": "You should specify a planet to delete"}), 400
+    if user is None:
+        return jsonify({"msg": "User not found"}), 404
+
+    favorite_to_delete = Favorites.query.filter_by(id=favoriteid, user_id=userid).first()
+    if favorite_to_delete is None:
+        return jsonify({"msg": "Favorite not found"}), 404
+
     
-    print(data)
+    print(favorite_to_delete.serialize())
     
-    # db.session.delete(data)
+    # db.session.delete(favorite_to_delete)
     # db.session.commit()
 
     response_body = {
@@ -320,13 +323,6 @@ def delete_planet_id(id):
     }
 
     return jsonify(response_body), 200
-
-
-
-
-
-
-
 
 
 # this only runs if `$ python src/app.py` is executed

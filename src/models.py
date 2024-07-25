@@ -134,14 +134,19 @@ class Favorites(db.Model):
         return '<Favorites %r>' % self.id
 
     def serialize(self):
-        user = User.query.filter_by(id=self.user_id).first()
         vehicle = Vehicle.query.filter_by(id=self.vehicle_id).first()
-        print(vehicle)
+        character = Character.query.filter_by(id=self.character_id).first()
+        planet = Planet.query.filter_by(id=self.planet_id).first()
 
-        return {
-            "user_info": user.serialize(),
-            "character_id": self.character_id,
-            "planet_id": self.planet_id,
-            "vehicle_info": vehicle.serialize()
-            # do not serialize the password, its a security breach
+        data = {
+            "id" : self.id,
+            "user_id": self.user_id,
+            "character_name": character.serialize()["name"] if character else None,
+            "planet_name": planet.serialize()["name"] if planet else None,
+            "vehicle_name": vehicle.serialize()["name"] if vehicle else None
         }
+
+        # retona solo las key : values donde no son null
+        return {
+            key: value for key, value in data.items() if value is not None
+            }

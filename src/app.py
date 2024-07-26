@@ -44,8 +44,11 @@ def sitemap():
 def get_all_users():
 
     all_users = User.query.all()
+
+    if not all_users:
+        return ({"msg": "Users not found"}), 404
+
     users_serialized = list(map(lambda item : item.serialize(), all_users))
-    # print(users_serialized)
 
     response_body = {
         "msg": "Hello, this is your GET /user response ",
@@ -75,8 +78,13 @@ def get_one_user(id):
 def get_all_planets():
 
     all_planets = Planet.query.all()
+
+    if not all_planets:
+        return ({"msg": "Planets not found"}), 404
+    
     planets_serialized = list(map(lambda item : item.serialize(), all_planets))
     # print(planets_serialized)
+
 
     response_body = {
         "msg": "Hello, this is your GET /planets response ",
@@ -90,6 +98,10 @@ def get_all_planets():
 def get_all_characters():
 
     all_characters = Character.query.all()
+
+    if not all_characters:
+        return ({"msg": "Characters not found"}), 404
+
     characters_serialized = list(map(lambda item : item.serialize(), all_characters))
     # print(characters_serialized)
 
@@ -105,6 +117,10 @@ def get_all_characters():
 def get_all_vehicles():
 
     all_vehicles = Vehicle.query.all()
+
+    if not all_vehicles:
+        return ({"msg": "Vehicles not found"}), 404
+    
     vehicles_serialized = list(map(lambda item : item.serialize(), all_vehicles))
     
 
@@ -140,6 +156,7 @@ def get_one_character(id):
 def get_one_planet(id):
 
     planet = Planet.query.filter_by(id=id).first()
+
     if planet is None:
         return jsonify({"msg": "Planet not found"}), 404
     
@@ -162,7 +179,7 @@ def get_one_vehicle(id):
         return jsonify({"msg": "Vehicle not found"}), 404
     
     vehicle_serialized = vehicle.serialize()
-    # print(planet)
+    
 
     response_body = {
         "msg": "Hello, this is your GET /vehicle/id response ",
@@ -299,8 +316,8 @@ def add_favorite_vehicle(id):
 
 # *********** DELETE ************
 
-
-@app.route('/user/<int:userid>/favorite/<int:favoriteid>', methods=['DELETE'])
+# Delete an item on the favorite list of a specific user
+@app.route('/favorite/<int:favoriteid>/<int:userid>', methods=['DELETE'])
 def delete_planet_id(userid, favoriteid):
 
     user = User.query.filter_by(id=userid).first()
@@ -309,17 +326,18 @@ def delete_planet_id(userid, favoriteid):
         return jsonify({"msg": "User not found"}), 404
 
     favorite_to_delete = Favorites.query.filter_by(id=favoriteid, user_id=userid).first()
+
     if favorite_to_delete is None:
         return jsonify({"msg": "Favorite not found"}), 404
 
     
     print(favorite_to_delete.serialize())
     
-    # db.session.delete(favorite_to_delete)
-    # db.session.commit()
+    db.session.delete(favorite_to_delete)
+    db.session.commit()
 
     response_body = {
-        "msg": "Planet deleted"
+        "msg": "Favorite deleted"
     }
 
     return jsonify(response_body), 200

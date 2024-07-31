@@ -242,9 +242,90 @@ def add_user():
             )
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"msg": "user created successfully"}), 201   
+        return jsonify({"msg": "user created successfully"}), 201  
 
     return jsonify({"msg": "user email already exists"}), 409
+
+# Post planet
+@app.route('/planet', methods=['POST'])
+def add_planet():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a planet"}), 400
+    
+    new_planet = Planet(
+            name = data["name"],
+            rotation_period = data["rotation_period"],
+            orbital_period = data["orbital_period"],
+            diameter = data["diameter"],
+            climate = data["climate"],
+            gravity = data["gravity"],
+            terrain = data["terrain"],
+            surface_water = data["surface_water"],
+            population = data["population"]
+            )
+    
+    db.session.add(new_planet)
+    db.session.commit()
+
+    return jsonify({"msg": "Planet created successfully"}), 201
+
+# Post character
+@app.route('/character', methods=['POST'])
+def add_character():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a character"}), 400
+    
+    new_character = Character(
+            name = data["name"],
+            height = data["height"],
+            mass = data["mass"],
+            hair_color = data["hair_color"],
+            skin_color = data["skin_color"],
+            eye_color = data["eye_color"],
+            birth_year = data["birth_year"],
+            gender = data["gender"]
+            )
+    
+    db.session.add(new_character)
+    db.session.commit()
+
+    return jsonify({"msg": "Character created successfully"}), 201
+
+# Post vehicle
+@app.route('/vehicle', methods=['POST'])
+def add_vehicle():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a vehicle"}), 400
+    
+    new_vehicle = Vehicle(
+            name = data["name"],
+            model = data["model"],
+            manufacturer = data["manufacturer"],
+            cost_in_credits = data["cost_in_credits"],
+            length = data["length"],
+            max_atmosphering_speed = data["max_atmosphering_speed"],
+            crew = data["crew"],
+            passengers = data["passengers"],
+            cargo_capacity = data["cargo_capacity"],
+            consumables = data["consumables"],
+            vehicle_class = data["vehicle_class"]
+            )
+    
+    db.session.add(new_vehicle)
+    db.session.commit()
+
+    return jsonify({"msg": "Character created successfully"}), 201
+   
+
 
 # Post favorite planet for specific user
 @app.route('/favorite/planet/<int:id>', methods=['POST'])

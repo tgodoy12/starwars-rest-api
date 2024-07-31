@@ -222,6 +222,30 @@ def get_user_favorites(id):
 
 # *********** POSTS ***********
 
+# Post user
+@app.route('/user', methods=['POST'])
+def add_user():
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"msg": "You should specify a user"}), 400
+    
+    user = User.query.filter_by(email = data["email"]).first()
+
+    if not user:
+        new_user = User(
+            email = data["email"], 
+            user_name = data["user_name"],
+            password = data["password"],
+            is_active = data["is_active"]
+            )
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"msg": "user created successfully"}), 201   
+
+    return jsonify({"msg": "user email already exists"}), 409
+
 # Post favorite planet for specific user
 @app.route('/favorite/planet/<int:id>', methods=['POST'])
 def add_favorite_planet(id):
